@@ -1,6 +1,6 @@
 # Flowformer
 
-Automatic detection of blast cell using transformer based neural networks.
+Automatic detection of blast cell using transformers.
 
 ## Installation
 
