@@ -22,13 +22,11 @@ installer/FlowMe.x64*
 *.TMP
 .vscode
 /.idea
-/data
 /.ipynb_checkpoints
 /demos/.ipynb_checkpoints
 /saved
 /demos
 *.png
-*.txt
 _old
 output
 saved
