@@ -1,0 +1,79 @@
+# git ignore file
+*.exe
+*.sdf
+*.suo
+*.pdb
+*.filters
+*.htm
+*.aps
+build*
+/.project
+CMakeUser.cmake
+CMakeUser.txt
+CMakeUserPaths.cmake
+CMakeLists.txt.user
+release
+installer/FlowMe.x64*
+*.msi
+.vimrc
+*.dir
+/x64
+/x86
+*.TMP
+.vscode
+/.idea
+/data
+/.ipynb_checkpoints
+/demos/.ipynb_checkpoints
+/saved
+/demos
+*.png
+*.txt
+_old
+output
+saved
+tmp
+
+optimusPrime.png
+
+# python stuff
+__pycache__
+/env*
+/ub_env
+/env-linux
+*.egg-info
+*.egg
+FlowMePy*tar.gz
+_build
+dist
+/img*
+
+# Sphinx documentation
+docs/_build/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# vs code
+*.code-workspace

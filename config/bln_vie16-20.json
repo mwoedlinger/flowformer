@@ -1,0 +1,68 @@
+{
+    "name": "bln_vie16-20",
+    "n_gpu": 1,
+    "arch": {
+        "type": "SetTransformer",
+        "args": {
+            "num_inds": 16,
+            "dim_hidden": 32,
+            "num_heads": 4,
+            "layer_norm": true,
+            "hidden_layers": 3,
+            "residual": false,
+            "mode": "binary"
+        }
+    },
+    "data_loader": {
+        "type": "FlowDataLoader",
+        "args": {
+            "data_dir": "data/bln_vie16-20",
+            "fast_preload_dir": "/data/mwoedlinger/data/tmp/bln_vie16-20",
+            "spillover_augmentation": false,
+            "center": false,
+            "fast_preload": true,
+            "spillover_augmentation_intensity": 0.0,
+            "markers": "TIME, FSC-A, FSC-W, SSC-A, CD20, CD10, CD45, CD34, CD19, CD38, SY41",
+            "sequence_length": false,
+            "batch_size": 1,
+            "shuffle": true,
+            "sort": false,
+            "num_workers": 2
+        }
+    },
+    "optimizer": {
+        "type": "Adam",
+        "args": {
+            "lr": 0.001,
+            "amsgrad": true
+        }
+    },
+    "loss": "bce_loss",
+    "metrics": [
+        "f1_score",
+        "mrd_gt",
+        "mrd_pred",
+        "precision",
+        "recall"
+    ],
+    "lr_scheduler": {
+        "type": "CosineAnnealingLR",
+        "args": {
+            "T_max": 10,
+            "eta_min": 0.0002
+        }
+    },
+    "trainer": {
+        "epochs": 100,
+        "save_dir": "saved/",
+        "save_period": 1,
+        "verbosity": 1,
+        "monitor": "max val_f1_score",
+        "visualize": [
+            "CD10",
+            "CD45"
+        ],
+        "early_stop": 50,
+        "tensorboard": true
+    }
+}
