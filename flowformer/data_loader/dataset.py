@@ -60,7 +60,7 @@ class FlowData(torch.utils.data.Dataset):
             self.data_type != 'test')
         if self.fast_preload:
             Path(kwargs['fast_preload_dir']).mkdir(
-                parents=False, exist_ok=True)
+                parents=True, exist_ok=True)
             self.tmp_path = Path(
                 kwargs['fast_preload_dir']) / Path(self.data_type)
             self.files = self._preload()
