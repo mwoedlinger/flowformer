@@ -1,6 +1,6 @@
 # Flowformer
 
-Automatic detection of blast cell using transformers.
+Automatic detection of blast cells in ALL data using transformers.
 
 ## Installation
 
