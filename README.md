@@ -15,6 +15,8 @@ Install with:
 pip install flowmepy
 ```
 
+(If you run into issues with newer versions of dependencies check the `requirements.txt` file. It contains the environment package dependencies at the time of testing)
+
 ## Usage
 
 The training configurations is defined in a config json file (check out the config folder for some the configs used for the experiments in our paper).
