@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name = 'flowformer',
-    version = '0.0.1',
+    version = '1.0.0',
     author = 'Matthias Woedlinger',
     author_email = 'mwoedlinger@cvl.tuwien.ac.at',
     description = 'Applying transformers to cell data',
@@ -19,6 +19,7 @@ setup(
         'scikit-learn',
         'matplotlib',
         'torch',
-        'torchvision'
+        'torchvision',
+        'flowmepy'
     ],
 )

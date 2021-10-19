@@ -14,7 +14,7 @@ def cellwise_acc(output, target):
 
 def f1_score(output, target, eps=0.00001):
     with torch.no_grad():
-        pred = (output > 0).int()
+        pred = (output > 0.5).int()
         assert pred.shape == target.shape, f'pred shape {pred.shape} != target shape {target.shape}'
 
         tp = torch.sum((pred == 1)*(target == 1)).item()
@@ -30,7 +30,7 @@ def f1_score(output, target, eps=0.00001):
 
 def precision(output, target, eps=0.00001):
     with torch.no_grad():
-        pred = (output > 0).int()
+        pred = (output > 0.5).int()
         assert pred.shape == target.shape, f'pred shape {pred.shape} != target shape {target.shape}'
 
         tp = torch.sum((pred == 1)*(target == 1)).item()
@@ -42,7 +42,7 @@ def precision(output, target, eps=0.00001):
 
 def recall(output, target, eps=0.00001):
     with torch.no_grad():
-        pred = (output > 0).int()
+        pred = (output > 0.5).int()
         assert pred.shape == target.shape, f'pred shape {pred.shape} != target shape {target.shape}'
 
         tp = torch.sum((pred == 1)*(target == 1)).item()
@@ -68,7 +68,7 @@ def mse(output, target):
 
 def mrd_gt(output, target, eps=0.00001):
     with torch.no_grad():
-        pred = (output > 0).int()
+        pred = (output > 0.5).int()
         assert pred.shape == target.shape, f'pred shape {pred.shape} != target shape {target.shape}'
 
         blast = torch.sum((target == 1)).item()
@@ -79,7 +79,7 @@ def mrd_gt(output, target, eps=0.00001):
 
 def mrd_pred(output, target, eps=0.00001):
     with torch.no_grad():
-        pred = (output > 0).int()
+        pred = (output > 0.5).int()
         assert pred.shape == target.shape, f'pred shape {pred.shape} != target shape {target.shape}'
 
         blast = torch.sum((pred == 1)).item()
