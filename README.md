@@ -1,6 +1,9 @@
 # Flowformer
 
-Automatic detection of blast cells in ALL data using transformers.
+Automatic detection of blast cells in ALL data using transformers. 
+
+Official implementation of our work: *"Automated Identification of Cell Populations in Flow Cytometry Data with Transformers"*
+by Matthias Wödlinger, Michael Reiter, Lisa Weijler, Margarita Maurer-Granofszky, Angela Schumich, Michael Dworzak
 
 ## Installation
 
@@ -51,3 +54,16 @@ Here is what needs to be done (I recommend starting with one of the existing con
 ## Project layout
 
 The project is based on [this](https://github.com/victoresque/pytorch-template) pytorch template.
+
+## Citation
+
+If you use this project please consider citing our work
+
+```
+@article{wodlinger2021automated,
+  title={Automated Identification of Cell Populations in Flow Cytometry Data with Transformers},
+  author={W{\"o}dlinger, Matthias and Reiter, Michael and Weijler, Lisa and Maurer-Granofszky, Margarita and Schumich, Angela and Dworzak, Michael},
+  journal={arXiv preprint arXiv:2108.10072},
+  year={2021}
+}
+```
