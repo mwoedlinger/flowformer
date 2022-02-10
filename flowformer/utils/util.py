@@ -8,6 +8,9 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import torch
+import plotly.express as px
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
 
 def read_stats(filename):
@@ -27,13 +30,15 @@ def tictoc():
     Returns time in seconds since the last time the function was called.
     For the initial call 0 is returned.
     """
-    if not hasattr(tictoc, 'tic'):
-        tictoc.tic = time()
-
     toc = time()
-    dt = toc - tictoc.tic
-    tictoc.tic = toc
 
+    try:
+        dt = toc - tictoc.tic
+    except AttributeError:
+        dt = 0
+
+    tictoc.tic = toc
+    
     return dt
 
 
@@ -258,6 +263,68 @@ def draw_cells(data, labels, predictions, markers=[1, 2], marker_names=['FSC-A',
 
     return fig
 
+def draw_single_projection(data: pd.DataFrame, labels: np.array, x: str='CD10', y: str='CD45', num_samples=10000, **kwargs):
+    d = data[:num_samples]
+    p = (labels[:num_samples] > 0.5)*1
+    
+    fig = px.scatter(d,
+                     x=x, y=y,
+                     color=p,
+                     **kwargs)
+    return fig
+    
+def draw_projections(data: pd.DataFrame, labels: np.array, predictions: np.array, marker_pairs: list=[['CD45', 'CD10']], num_samples=1000, **kwargs):
+    d = data[10000:10000+num_samples]
+    p = (predictions[10000:10000+num_samples] > 0.5)*1
+    l = labels[10000:10000+num_samples]
+    num_plots = len(marker_pairs)
+        
+    fig = make_subplots(rows=1, cols=num_plots)
+    fig.update_layout(template='simple_white')
+    
+    # Color the predictions according to correctness
+    tn = np.logical_not(np.logical_or(l, p))    # healthy
+    tp = np.logical_and(l, p)                   # blast
+    fp = np.logical_and(np.logical_not(l), p)   # blast predicted but healthy
+    fn = np.logical_and(l, np.logical_not(p))   # healthy predicted but blast
+
+    cdict = {
+        1: 'rgb(83,133,251)',
+        2: 'rgb(187,0,4)',
+        3: 'rgb(196,79,240)',
+        4: 'rgb(111,230,89)'
+    }
+    colors = [cdict[c] for c in (tn + 2*tp + 3*fp + 4*fn)]    
+
+    for n, m in enumerate(marker_pairs):
+        fig.add_trace(
+            go.Scatter(x=d[m[0]], y=d[m[1]], 
+                       mode='markers', 
+                       showlegend=False,
+                       marker={
+                           'color': colors, 
+                           'size': 4}),
+            row=1, col=n+1
+        )
+        y_max = max(d[m[1]])
+        if n == 0:
+            fig.update_layout(
+                **{'xaxis': {'title': {'text': m[0]}},
+                   'yaxis': {'title': {'text': m[1]},
+                             'range': [0,y_max+0.1]}}
+            )
+        else:
+            fig.update_layout(
+                **{'xaxis'+str(n+1): {'title': {'text': m[0]}},
+                   'yaxis'+str(n+1): {'title': {'text': m[1]},
+                             'range': [0,y_max+0.1]}}
+            )
+
+    fig.update_layout(**kwargs)
+    
+    return fig
+
+
 
 def draw_all(data, labels, predictions, marker_list, number_of_points=5000):
     """
@@ -371,46 +438,99 @@ def draw_panel(data, labels, predictions, marker_list, number_of_points=10000):
     return fig
 
 
-def mrd_plot(mrd_list_gt, mrd_list_pred, f1_score):
+def mrd_plot(mrd_list_gt, mrd_list_pred, f1_score, filenames=None):
     """
     Creates a plot for true and predicted mrd values.
     """
 
-    f1_score = np.array(f1_score)
-    colors = (np.outer((1-f1_score), [1.0, 0.0, 0.0]
-                       ) + np.outer(f1_score, [0.0, 1.0, 0.0]))
-    offset_frac = 3
-    hline = 5.0e-4
-    vline = 5.0e-4
-    offset = 1-1/offset_frac
+    if filenames is None:
+        filenames = [str(n) for n in range(len(mrd_list_gt))]
+
     min_val = 1.0e-5
 
     # Set min mrd to min_val:
     mrd_list_gt = [mrd if mrd >= min_val else min_val for mrd in mrd_list_gt]
-    mrd_list_pred = [mrd if mrd >=
-                     min_val else min_val for mrd in mrd_list_pred]
+    mrd_list_pred = [mrd if mrd >= min_val else min_val for mrd in mrd_list_pred]
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-
-    # Helper lines
-    ax.plot([0, 1], [0, 1], c='black', linestyle='-')
-    ax.plot([0, 1], [hline, hline], c='grey', linestyle='--')
-    ax.plot([vline, vline], [0, 1], c='grey', linestyle='--')
-    ax.plot([0, 1], [0, 1-offset], c='lightblue', linestyle='--')
-    ax.plot([0, 1-offset], [0, 1], c='lightblue', linestyle='--')
-
-    # Draw points
-    ax.scatter(mrd_list_pred, mrd_list_gt, s=10, c=colors)
-
-    # Adjust graph settings
-    ax.set_ylim(min_val, 1)
-    ax.set_xlim(min_val, 1)
-    ax.set_yscale('log')
-    ax.set_xscale('log')
-    ax.set_ylabel('True')
-    ax.set_xlabel('Predicted')
-
+    # Create figure
+    data = pd.DataFrame(list(zip(mrd_list_gt, mrd_list_pred, f1_score, filenames)), 
+                        columns=['gt', 'pred', 'f1_score', 'names'])
+    fig = px.scatter(data,
+                     x='gt', y='pred', 
+                     log_x=True, log_y=True, range_x=[min_val, 1], range_y=[min_val, 1],
+                     color='f1_score', template='simple_white', hover_name='names')
+    
+    # Add diagonal line
+    fig.add_shape(type='line',
+        x0=0, y0=0, x1=1, y1=1,
+        line=dict(
+            color='Gray',
+            width=2,
+            dash='dashdot',
+        )
+    )
+    
+    # Add vertical line
+    fig.add_shape(type='line',
+        x0=5.0e-4, y0=0, x1=5.0e-4, y1=1,
+        line=dict(
+            color='Gray',
+            width=2,
+            dash='dot',
+        )
+    )
+    
+    # Add horizontal line
+    fig.add_shape(type='line',
+        x0=0, y0=5.0e-4, x1=1, y1=5.0e-4,
+        line=dict(
+            color='Gray',
+            width=2,
+            dash='dot',
+        )
+    )
     return fig
+
+# def mrd_plot(mrd_list_gt, mrd_list_pred, f1_score):
+#     """
+#     Creates a plot for true and predicted mrd values.
+#     """
+
+#     f1_score = np.array(f1_score)
+#     colors = (np.outer((1-f1_score), [1.0, 0.0, 0.0]
+#                        ) + np.outer(f1_score, [0.0, 1.0, 0.0]))
+#     offset_frac = 3
+#     hline = 5.0e-4
+#     vline = 5.0e-4
+#     offset = 1-1/offset_frac
+#     min_val = 1.0e-5
+
+#     # Set min mrd to min_val:
+#     mrd_list_gt = [mrd if mrd >= min_val else min_val for mrd in mrd_list_gt]
+#     mrd_list_pred = [mrd if mrd >=
+#                      min_val else min_val for mrd in mrd_list_pred]
+
+#     fig, ax = plt.subplots(figsize=(10, 6))
+
+#     # Helper lines
+#     ax.plot([0, 1], [0, 1], c='black', linestyle='-')
+#     ax.plot([0, 1], [hline, hline], c='grey', linestyle='--')
+#     ax.plot([vline, vline], [0, 1], c='grey', linestyle='--')
+#     ax.plot([0, 1], [0, 1-offset], c='lightblue', linestyle='--')
+#     ax.plot([0, 1-offset], [0, 1], c='lightblue', linestyle='--')
+
+#     # Draw points
+#     ax.scatter(mrd_list_pred, mrd_list_gt, s=10, c=colors)
+
+#     # Adjust graph settings
+#     ax.set_ylim(min_val, 1)
+#     ax.set_xlim(min_val, 1)
+#     ax.set_yscale('log')
+#     ax.set_xscale('log')
+#     ax.set_ylabel('True')
+#     ax.set_xlabel('Predicted')
+
+#     return fig
 
 
 def mrd_lineplot(mrd_list_gt, mrd_list_pred, f1_score):

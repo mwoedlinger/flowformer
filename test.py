@@ -4,10 +4,13 @@ from tqdm import tqdm
 import numpy as np
 from pathlib import Path
 from matplotlib import pyplot as plt
+from shutil import move
+from datetime import datetime
+import pandas as pd
 
 import flowformer
 from flowformer import ConfigParser
-from flowformer.utils import mrd_plot, draw_panel, MetricTracker, tictoc
+from flowformer.utils import mrd_plot, draw_projections, MetricTracker, tictoc
 
 
 # fix random seeds for reproducibility
@@ -18,9 +21,7 @@ torch.backends.cudnn.benchmark = False
 np.random.seed(SEED)
 
 
-def test(config):
-
-
+def test(config, save_output):
     print('\n### Prepare test data ###')
     logger = config.get_logger('test')
 
@@ -60,16 +61,27 @@ def test(config):
 
     print(f'\n## Create output folder {config["name"]}')
     out_folder = Path('output') / Path(config['name'])
+    if out_folder.exists():
+        dt = str(datetime.now())
+        timestamp = dt[2:10].replace('-', '') + '-' + dt[11:19].replace(':', '')
+        move_dest = Path('output/moved') / Path(config['name'] + '_' + timestamp)
+        print(f'folder exists => Moved to {move_dest}')
+        move(out_folder, move_dest)
     out_folder.mkdir(parents=True)
+
+    if save_output:
+        print(f'\n## Create output figure folder {config["name"]}/figures')
+        out_figure_folder = Path('output') / Path(config['name']) / Path('figures')
+        out_figure_folder.mkdir(parents=True)
 
     print('\n### Begin testing ###')
     with torch.no_grad():
 
         for i in tqdm(range(data_len)):
-            batch = test_dataset[i]
-            data = batch['data'].to(device).unsqueeze(0)
-            target = batch['labels'].to(device).unsqueeze(0)
-            filename = str(test_dataset.files[i].name)
+            sample = test_dataset[i]
+            data = sample['data'].to(device).unsqueeze(0)
+            target = sample['labels'].to(device).unsqueeze(0)
+            filename = str(test_dataset.files[i].stem)
             file_list.append(filename)
 
             output = model(data)
@@ -81,6 +93,18 @@ def test(config):
             metrics.update('loss', loss.item())
             for met in metric_fns:
                 metrics.update(met.__name__, met(output, target))
+
+            if save_output:
+                vis_markers = config['trainer']['visualize']
+                marker_list = config['data_loader']['args']['markers'].replace(' ', '').split(',')
+
+                data = pd.DataFrame(data[0].cpu().numpy(), columns=marker_list)
+                fig = draw_projections(data=data, labels=target[0].cpu().numpy(), predictions=output[0].detach().cpu().numpy(),
+                                       marker_pairs=[['FSC-A', 'SSC-A'], ['CD45', 'SSC-A'], ['CD19', 'SSC-A'], ['CD45', 'CD10']], 
+                                       height=400, width=1600)
+                fig.write_image(str(out_figure_folder / (filename+'.png')))
+
+            # TODO: draw panel and save in output folder with metrics in filename
 
     # Log results for every file
     log_list = []
@@ -110,14 +134,11 @@ def test(config):
     print('\n## Create MRD plot')
     fig = mrd_plot(mrd_list_gt=metric_data['mrd_gt'],
                    mrd_list_pred=metric_data['mrd_pred'], f1_score=metric_data['f1_score'])
-    fig.savefig(str(out_folder / 'out_mrd.pdf'), format='pdf')
+    fig.write_image(str(out_folder / 'out_mrd.pdf'))
 
     print('\n## Plot panel')
     marker_list = config['data_loader']['args']['markers'].replace(
         ' ', '').split(',')
-    fig = draw_panel(data=data, labels=target, predictions=output,
-                     marker_list=marker_list, number_of_points=5000)
-    fig.savefig(str(out_folder / 'panel.png'), format='png', dpi=300)
 
 
 if __name__ == '__main__':
@@ -128,6 +149,7 @@ if __name__ == '__main__':
                       help='path to latest checkpoint (default: None)')
     args.add_argument('-d', '--device', default=None, type=str,
                       help='indices of GPUs to enable (default: all)')
+    args.add_argument('-s', '--save_output', action='store_true', help='save output plots')
 
     config = ConfigParser.from_args(args)
-    test(config)
+    test(config, args.parse_args().save_output)

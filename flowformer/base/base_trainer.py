@@ -1,7 +1,7 @@
 import torch
 from abc import abstractmethod
 from numpy import inf
-from ..logger import TensorboardWriter
+from ..logger import WandbWriter
 from tqdm import tqdm
 
 
@@ -44,7 +44,7 @@ class BaseTrainer:
         self.checkpoint_dir = config.save_dir
 
         # setup visualization writer instance                
-        self.writer = TensorboardWriter(config.log_dir, self.logger, cfg_trainer['tensorboard'])
+        self.writer = WandbWriter(config.log_dir, self.logger, cfg_trainer['logger'], self.model)
 
         if config.resume is not None:
             self._resume_checkpoint(config.resume)
@@ -69,6 +69,7 @@ class BaseTrainer:
             # save logged informations into log dict
             log = {'epoch': epoch}
             log.update(result)
+            self.writer.commit()
 
             # print logged informations to the screen
             for key, value in log.items():

@@ -2,8 +2,9 @@ import numpy as np
 import torch
 from torchvision.utils import make_grid
 from tqdm import tqdm
+import pandas as pd
 from ..base import BaseTrainer
-from ..utils import inf_loop, MetricTracker, draw_cells, mrd_plot
+from ..utils import inf_loop, MetricTracker, draw_projections, mrd_plot
 from ..utils import ptictoc as pt
 
 
@@ -41,22 +42,20 @@ class Trainer(BaseTrainer):
         self.train_metrics.reset()
         for batch_idx, batch in tqdm(enumerate(self.data_loader), desc='train', total=len(self.data_loader)):
             # Load data
-            # pt() # tictoc
             data = batch['data'].to(self.device)
             target = batch['labels'].to(self.device)
-            # pt('load') # tictoc
 
             # Forward + backward pass
             self.optimizer.zero_grad()
             output = self.model(data) # Apply model
-            # pt('otu) # tictoc
+            
             loss = self.criterion(output, target)
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), 2.50)
             self.optimizer.step()
-            # pr('opt') # tictoc
 
             # Write metrics etc. to tensorboard
-            self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
+            self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx, mode='train')
             self.train_metrics.update('loss', loss.item())
             for met in self.metric_ftns:
                 self.train_metrics.update(met.__name__, met(output, target))
@@ -66,25 +65,33 @@ class Trainer(BaseTrainer):
                     epoch,
                     self._progress(batch_idx),
                     loss.item()))
+
                 # Draw prediction vs GT:
                 vis_markers = self.config['trainer']['visualize']
                 marker_list = self.config['data_loader']['args']['markers'].replace(' ', '').split(',')
-                marker_idx = [marker_list.index(vis_markers[0]), marker_list.index(vis_markers[1])]
-                self.writer.add_figure('FSC-A vs FSC-W', draw_cells(data, target, output, markers=marker_idx, marker_names=vis_markers))
+
+                data = pd.DataFrame(data[0].cpu().numpy(), columns=marker_list)
+                self.writer.add_figure('default_panel', 
+                                        draw_projections(data=data, labels=target[0].cpu().numpy(), predictions=output[0].detach().cpu().numpy(),
+                                                        marker_pairs=vis_markers, 
+                                                        height=400, width=1600))
 
             if batch_idx == self.len_epoch:
                 break
-            # pt('rest')                                                                                # tictoc
+            
+            self.writer.commit()
 
         log, log_median = self.train_metrics.result()
 
         if self.do_validation:
-            val_log, val_log_median = self._valid_epoch(epoch)
+            val_log, val_log_median = self._valid_epoch(epoch)   
             log.update(**{'val_'+k : v for k, v in val_log.items()})
-            log.update(**{'val_median_f1_score' : val_log_median['f1_score']})
+            log.update(**{'val_median_f1_score' : val_log_median['f1_score']})                                                     
+            self.writer.commit()
 
         if self.lr_scheduler is not None:
             self.lr_scheduler.step()
+            
         return log
 
     def _valid_epoch(self, epoch):
@@ -96,36 +103,38 @@ class Trainer(BaseTrainer):
         """
         self.model.eval()
         self.valid_metrics.reset()
+        filenames = []
         with torch.no_grad():
             for batch_idx, batch in tqdm(enumerate(self.valid_data_loader), desc= 'eval', total=len(self.valid_data_loader)):
                 # Load data
                 data = batch['data'].to(self.device)
                 target = batch['labels'].to(self.device)
+                filenames.append(self.valid_data_loader.dataset.get_filename(batch['idx']))
 
                 # Forward pass
                 output = self.model(data) # Apply model
                 loss = self.criterion(output, target)
 
-                self.writer.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')
+                self.writer.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'eval')
                 self.valid_metrics.update('loss', loss.item())
                 for met in self.metric_ftns:
                     self.valid_metrics.update(met.__name__, met(output, target))
-                # self.writer.add_image('input', make_grid(data.cpu(), nrow=8, normalize=True))
+                # self.writer.add_figure('input', make_grid(data.cpu(), nrow=8, normalize=True))
 
-                # if batch_idx % self.log_step == 0:
-                #     # Draw prediction vs GT:
-                #     vis_markers = self.config['trainer']['visualize']
-                #     marker_list = self.config['data_loader']['args']['markers'].replace(' ', '').split(',')
-                #     marker_idx = [marker_list.index(vis_markers[0]), marker_list.index(vis_markers[1])]
-                #     self.writer.add_figure('FSC-A vs FSC-W', draw_cells(data, target, output, markers=marker_idx, marker_names=vis_markers))
+                if batch_idx % self.log_step == 0:
+                    # Draw prediction vs GT:
+                    vis_markers = self.config['trainer']['visualize']
+                    marker_list = self.config['data_loader']['args']['markers'].replace(' ', '').split(',')
 
-        # add histogram of model parameters to the tensorboard
-        for name, p in self.model.named_parameters():
-            self.writer.add_histogram(name, p, bins='auto')
+                    data = pd.DataFrame(data[0].cpu().numpy(), columns=marker_list)
+                    self.writer.add_figure('default_panel', 
+                                            draw_projections(data=data, labels=target[0].cpu().numpy(), predictions=output[0].detach().cpu().numpy(),
+                                                            marker_pairs=vis_markers, 
+                                                            height=400, width=1600))
 
         # MRD figure
         metric_data = self.valid_metrics.data()
-        mrd_fig = mrd_plot(mrd_list_gt=metric_data['mrd_gt'], mrd_list_pred=metric_data['mrd_pred'], f1_score=metric_data['f1_score'])
+        mrd_fig = mrd_plot(mrd_list_gt=metric_data['mrd_gt'], mrd_list_pred=metric_data['mrd_pred'], f1_score=metric_data['f1_score'], filenames=filenames)
         self.writer.add_figure('MRD', mrd_fig)
 
         return self.valid_metrics.result()

@@ -1,6 +1,56 @@
 import importlib
 from datetime import datetime
 
+class WandbWriter():
+    def __init__(self, log_dir, logger, enabled, model):
+        self.writer = None
+        self.selected_module = ""
+
+        if enabled:
+            log_dir = str(log_dir)
+
+            # Retrieve vizualization writer.
+            try:
+                self.wandb = importlib.import_module('wandb')
+            except ImportError:
+                message = "Warning: visualization (wandb) is configured to use, but currently not installed on " \
+                          "this machine. Please install wandb with 'pip install wandb' or turn off the option in the 'config.json' file."
+                logger.warning(message)
+
+        # TODO: specify wandb run with name, config, etc.
+        self.wandb.init(project='transformerflow')
+        self.wandb.watch(model, log='all', log_freq=10)
+
+        self.step = 0
+        self.mode = ''
+        self.logs = {}
+
+        self.timer = datetime.now()
+
+    def set_step(self, step, mode='train'):
+        self.mode = mode
+        self.step = step
+        if step == 0:
+            self.timer = datetime.now()
+        else:
+            duration = datetime.now() - self.timer
+            self.log('steps_per_sec', 1 / duration.total_seconds())
+            self.timer = datetime.now()
+
+    def add_scalar(self, key, val):
+        self.log(key, val)
+
+    def add_figure(self, key, val):
+        # self.log(key, self.wandb.Image(val)) # This would log the plot as an image
+        self.log(key, val)
+
+    def log(self, tag, val):
+        logs = {f'{self.mode}/{tag}': val}
+        self.logs.update(logs)
+
+    def commit(self):
+        self.wandb.log(self.logs, step=self.step)
+        self.logs = {}
 
 class TensorboardWriter():
     def __init__(self, log_dir, logger, enabled):

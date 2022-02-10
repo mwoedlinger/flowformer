@@ -29,6 +29,7 @@ installer/FlowMe.x64*
 *.png
 _old
 output
+wandb
 saved
 tmp
 
