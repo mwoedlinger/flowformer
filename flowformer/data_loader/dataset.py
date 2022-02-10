@@ -92,11 +92,7 @@ class FlowData(torch.utils.data.Dataset):
         """
         # Load fcs data
         with suppress_stdout_stderr():  # suppress qinfo output
-            if self.spillover_augment:
-                sample = flowme.fcs(str(file), spillover_path=self.spillover_augment,
-                                    spillover_intensity=self.spillover_augment_intensity)
-            else:
-                sample = flowme.fcs(str(file))
+            sample = flowme.fcs(str(file))
 
             # Remove dublicate columns if available
             events = sample.events()
