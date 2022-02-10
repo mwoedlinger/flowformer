@@ -23,7 +23,5 @@ class FlowDebugLoader(torch.utils.data.DataLoader):
 
         if kwargs['data_type'] != 'train':
             kwargs['batch_size'] = 1
-            kwargs['shuffle'] = False
 
-        super().__init__(dataset=dataset, batch_size=kwargs['batch_size'], shuffle=kwargs['shuffle'],
-                         num_workers=kwargs['num_workers'])
+        super().__init__(dataset=dataset, batch_size=kwargs['batch_size'], num_workers=kwargs['num_workers'])

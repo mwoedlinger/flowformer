@@ -21,15 +21,25 @@ class WandbWriter():
         self.wandb.init(project='transformerflow')
         self.wandb.watch(model, log='all', log_freq=10)
 
-        self.step = 0
+        self._step = 0
         self.mode = ''
         self.logs = {}
 
         self.timer = datetime.now()
 
+    def set_mode(self, mode='train'):
+        self.mode = mode
+
+    def step(self):
+        self._step += 1
+        
+        duration = datetime.now() - self.timer
+        self.log('steps_per_sec', 1 / duration.total_seconds())
+        self.timer = datetime.now()
+
     def set_step(self, step, mode='train'):
         self.mode = mode
-        self.step = step
+        self._step = step
         if step == 0:
             self.timer = datetime.now()
         else:
@@ -49,7 +59,7 @@ class WandbWriter():
         self.logs.update(logs)
 
     def commit(self):
-        self.wandb.log(self.logs, step=self.step)
+        self.wandb.log(self.logs, step=self._step)
         self.logs = {}
 
 class TensorboardWriter():

@@ -39,6 +39,7 @@ class Trainer(BaseTrainer):
         :return: A log that contains average loss and metric in this epoch.
         """
         self.model.train()
+        self.writer.set_mode('train')
         self.train_metrics.reset()
         for batch_idx, batch in tqdm(enumerate(self.data_loader), desc='train', total=len(self.data_loader)):
             # Load data
@@ -55,7 +56,8 @@ class Trainer(BaseTrainer):
             self.optimizer.step()
 
             # Write metrics etc. to tensorboard
-            self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx, mode='train')
+            self.writer.step()
+            # self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx, mode='train')
             self.train_metrics.update('loss', loss.item())
             for met in self.metric_ftns:
                 self.train_metrics.update(met.__name__, met(output, target))
@@ -102,6 +104,7 @@ class Trainer(BaseTrainer):
         :return: A log that contains information about validation
         """
         self.model.eval()
+        self.writer.set_mode('eval')
         self.valid_metrics.reset()
         filenames = []
         with torch.no_grad():
@@ -115,7 +118,7 @@ class Trainer(BaseTrainer):
                 output = self.model(data) # Apply model
                 loss = self.criterion(output, target)
 
-                self.writer.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'eval')
+                # self.writer.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'eval')
                 self.valid_metrics.update('loss', loss.item())
                 for met in self.metric_ftns:
                     self.valid_metrics.update(met.__name__, met(output, target))
