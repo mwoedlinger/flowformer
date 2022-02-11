@@ -53,12 +53,6 @@ class SetTransformerEncoder(BaseModel):
         enc_layers.append(ISAB(dim_hidden, dim_input, 1, num_inds, ln=ln)) #num_heads == 1 because dim_input can be a prime number
         self.enc = nn.Sequential(*enc_layers)
 
-        # enc_layers = [ISAB_dist(dim_input, dim_hidden, num_heads, num_inds, ln=ln)]
-        # for _ in range(1, kwargs['hidden_layers']):
-        #     enc_layers.append(ISAB_dist(dim_hidden, dim_hidden, num_heads, num_inds, ln=ln))
-        # enc_layers.append(ISAB_dist(dim_hidden, dim_input, 1, num_inds, ln=ln)) #num_heads == 1 because dim_input can be a prime number
-        # self.enc = nn.Sequential(*enc_layers)
-
     def forward(self, x):
         return self.enc(x)
 
@@ -110,36 +104,6 @@ class SetTransformer(BaseModel):
             return self.dec(dec_in)
         elif self.mode == 'binary':
             return self.dec(dec_in)[:,:,0]
-
-class SetTransformerEncoderBottleneck(BaseModel):
-    """
-    Set transformer as described in https://arxiv.org/abs/1810.00825
-    dim_input:  dimensionality of input              (flowdata: number of markers)
-    num_ouputs: output sequence length               (flowdata: sequence length)
-    dim_output: dimensionality of output             (flowdata: 1)
-    num_inds:   number of induced points
-    dim_hidden: dimension of hidden representation
-    num_heads:  number of attention heads
-    ln:         use layer norm true/false
-    """
-    def __init__(self, **kwargs):
-        super(SetTransformerEncoderBottleneck, self).__init__()
-
-        dim_input = kwargs['_num_markers']
-        self.sequence_length = sequence_length = kwargs['_sequence_length']
-        num_inds = kwargs['num_inds']
-        dim_hidden = kwargs['dim_hidden'] # dim_hidden must be divisible by num_heads i.e. dim_hidden%num_heads = 0
-        num_heads = kwargs['num_heads']
-        ln = kwargs['layer_norm']
-
-        enc_layers = [ISAB(dim_input, dim_hidden, num_heads, num_inds, ln=ln)]
-        for _ in range(1, kwargs['hidden_layers']):
-            enc_layers.append(ISAB(dim_hidden, dim_hidden, num_heads, num_inds, ln=ln))
-        enc_layers.append(ISAB(dim_hidden, dim_input, 1, num_inds, ln=ln)) #num_heads == 1 because dim_input can be a prime number
-        self.enc = nn.Sequential(*enc_layers)
-
-    def forward(self, x):
-        return self.enc(x)
 
 
 class DebugModel(BaseModel):

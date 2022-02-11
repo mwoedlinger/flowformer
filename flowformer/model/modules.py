@@ -36,7 +36,7 @@ def squared_difference(x, y):
     dist = x_norm + y_norm - 2.0 * torch.bmm(x, y_t)
     return dist
 
-
+# the modules below are modified from https://github.com/juho-lee/set_transformer
 class MAB(nn.Module):
     """
     Multihead attention Block (MAB). Performs multihead attention with a residual connection followed by
