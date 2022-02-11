@@ -103,8 +103,7 @@ def test(config, save_output):
                                        marker_pairs=[['FSC-A', 'SSC-A'], ['CD45', 'SSC-A'], ['CD19', 'SSC-A'], ['CD45', 'CD10']], 
                                        height=400, width=1600)
                 fig.write_image(str(out_figure_folder / (filename+'.png')))
-
-            # TODO: draw panel and save in output folder with metrics in filename
+            # TODO: add metrics to filename
 
     # Log results for every file
     log_list = []
@@ -132,9 +131,11 @@ def test(config, save_output):
             text_file.write(l+'\n')
 
     print('\n## Create MRD plot')
-    fig = mrd_plot(mrd_list_gt=metric_data['mrd_gt'],
+    # TODO save interactively such that the filenames appear when hovering over a point
+    fig = mrd_plot(mrd_list_gt=metric_data['mrd_gt'], filenames=file_list,
                    mrd_list_pred=metric_data['mrd_pred'], f1_score=metric_data['f1_score'])
-    fig.write_image(str(out_folder / 'out_mrd.pdf'))
+    fig.write_image(str(out_folder / 'mrd.pdf'))
+    fig.write_html(str(out_folder / 'mrd.html'))
 
     print('\n## Plot panel')
     marker_list = config['data_loader']['args']['markers'].replace(
@@ -142,7 +143,7 @@ def test(config, save_output):
 
 
 if __name__ == '__main__':
-    args = argparse.ArgumentParser(description='PyTorch Template')
+    args = argparse.ArgumentParser(description='Test model on unseen data.')
     args.add_argument('-c', '--config', default=None, type=str,
                       help='config file path (default: None)')
     args.add_argument('-r', '--resume', default=None, type=str,
