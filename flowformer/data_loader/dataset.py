@@ -1,6 +1,6 @@
 import torch
 import pandas as pd
-from random import randint
+import random
 from pathlib import Path
 from shutil import rmtree
 from tqdm import tqdm
@@ -28,18 +28,23 @@ class FlowData(torch.utils.data.Dataset):
         self.data_type = kwargs['data_type']
         self.marker_list = kwargs['markers'].replace(' ', '').split(',')
 
-        # If data dir is specified it will look for train.txt, eval.txt and test.txt, otherwise use it is expected that the
+        # If data dir is specified it will look for train.txt, eval.txt and test.txt, otherwise it is expected that
         # the text files are given directly with kwargs['train], kwargs['eval'] and kwargs['test'].
         if 'data_dir' in kwargs:
+            print(f'Load ')
             self.data_root = get_project_root() / Path(kwargs['data_dir'])
             self.data_list = self.data_root / Path(kwargs['data_type'] + '.txt')
         else:
             self.data_list = get_project_root() / Path(kwargs[self.data_type])
 
+        if self.data_type == 'train':
+            self.perturb_all = kwargs.get('perturb_all', False)
+            self.perturb_blasts = kwargs.get('perturb_blasts', False)
+            self.perturb_labels = kwargs.get('perturb_labels', False)
+            self.augmentation_intensity = kwargs.get('augmentation_intensity', 1)
 
         # Load files
-        self.fast_preload = kwargs['fast_preload'] and (
-            self.data_type != 'test')
+        self.fast_preload = kwargs.get('fast_preload') and (self.data_type != 'test')
         if self.fast_preload:
             Path(kwargs['fast_preload_dir']).mkdir(
                 parents=True, exist_ok=True)
@@ -68,10 +73,32 @@ class FlowData(torch.utils.data.Dataset):
         # data_dict = self._transform(data_dict)
         data_dict.update({'idx': idx})
 
-        return data_dict
+        if self.data_type == 'train':
+            return self._augment(data_dict)
+        else:
+            return data_dict
 
     def get_filename(self, idx):
         return self.files[idx].name
+
+    def _augment(self, data_dict):
+        if self.perturb_all:          
+            markers = random.sample(self.marker_list, self.perturb_all)
+            for m in markers:
+                m_idx = markers.index(m)
+                data_dict['data'][:, m_idx] += (random.random()-0.5)*self.augmentation_intensity
+
+        if self.perturb_blasts:
+            markers = random.sample(self.marker_list, self.perturb_blasts)
+            blasts = data_dict['labels']
+            for m in markers:
+                m_idx = markers.index(m)
+                data_dict['data'][:, m_idx] += blasts*(random.random()-0.5)*self.augmentation_intensity
+
+        if self.perturb_labels:
+            raise NotImplementedError
+            
+        return data_dict
 
     def _transform(self, data_dict):
         data = data_dict['data']

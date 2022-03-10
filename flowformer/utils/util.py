@@ -165,8 +165,6 @@ class MetricTracker:
             self._data[key] = []
 
     def update(self, key, value, n=1):
-        if self.writer is not None:
-            self.writer.add_scalar(key, value)
         self._data[key] += [value] * n
 
     def avg(self, key):
@@ -181,6 +179,13 @@ class MetricTracker:
     def result(self):
         avg_dict = {key: self.avg(key) for key in self._data.keys()}
         median_dict = {key: self.median(key) for key in self._data.keys()}
+
+        if self.writer is not None:
+            for key, value in avg_dict.items():
+                self.writer.add_scalar(key, value)
+            for key, value in median_dict.items():
+                self.writer.add_scalar('med_'+str(key), value)
+                
         return avg_dict, median_dict
 
 
