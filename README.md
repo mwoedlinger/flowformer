@@ -60,10 +60,12 @@ The project is based on [this](https://github.com/victoresque/pytorch-template) 
 If you use this project please consider citing our work
 
 ```
-@article{wodlinger2021automated,
-  title={Automated Identification of Cell Populations in Flow Cytometry Data with Transformers},
-  author={W{\"o}dlinger, Matthias and Reiter, Michael and Weijler, Lisa and Maurer-Granofszky, Margarita and Schumich, Angela and Dworzak, Michael},
-  journal={arXiv preprint arXiv:2108.10072},
-  year={2021}
+@article{wodlinger2022automated,
+  title={Automated identification of cell populations in flow cytometry data with transformers},
+  author={Wodlinger, Matthias and Reiter, Michael and Weijler, Lisa and Maurer-Granofszky, Margarita and Schumich, Angela and Dworzak, Michael N},
+  journal={Computers in Biology and Medicine},
+  pages={105314},
+  year={2022},
+  publisher={Elsevier}
 }
 ```
