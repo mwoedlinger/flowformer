@@ -1,25 +1,25 @@
 {
-    "name": "vie_ind_points",
+    "name": "bue_bln_performer",
     "n_gpu": 1,
     "arch": {
-        "type": "SetTransformer",
+        "type": "CellPerformer",
         "args": {
-            "num_inds": 16,
             "dim_hidden": 32,
             "num_heads": 4,
             "layer_norm": true,
-            "hidden_layers": 3,
-            "residual": false,
-            "mode": "binary"
+            "hidden_layers": 3
         }
     },
     "data_loader": {
         "type": "FlowDataLoader",
         "args": {
-            "train": "data/vie/train.txt",
-            "eval": "data/vie/eval.txt",
-            "test": "data/vie/test.txt",
-            "fast_preload_dir": "/data/mwoedlinger/data/tmp/vie",
+            "train": "data/bue_bln/train.txt",
+            "eval": "data/bue_bln/eval.txt",
+            "test": "data/bue_bln/test.txt",
+            "perturb_all": 1,
+            "perturb_blasts": 2,
+            "augmentation_intensity": 0.5,
+            "fast_preload_dir": "/data/mwoedlinger/data/tmp/bue_bln",
             "fast_preload": true,
             "markers": "TIME, FSC-A, FSC-W, SSC-A, CD20, CD10, CD45, CD34, CD19, CD38, SY41",
             "sequence_length": false,
@@ -45,8 +45,8 @@
     "lr_scheduler": {
         "type": "CosineAnnealingLR",
         "args": {
-            "T_max": 30,
-            "eta_min": 0.00002
+            "T_max": 10,
+            "eta_min": 0.0002
         }
     },
     "trainer": {

@@ -1,5 +1,5 @@
 {
-    "name": "bue_bln",
+    "name": "bue_bln_augmented_smaller",
     "n_gpu": 1,
     "arch": {
         "type": "SetTransformer",
@@ -16,17 +16,17 @@
     "data_loader": {
         "type": "FlowDataLoader",
         "args": {
-            "data_dir": "data/bue_bln",
+            "train": "data/bue_bln/train.txt",
+            "eval": "data/bue_bln/eval.txt",
+            "test": "data/bue_bln/test.txt",
+            "perturb_all": 1,
+            "perturb_blasts": 2,
+            "augmentation_intensity": 0.5,
             "fast_preload_dir": "/data/mwoedlinger/data/tmp/bue_bln",
-            "spillover_augmentation": false,
-            "center": false,
             "fast_preload": true,
-            "spillover_augmentation_intensity": 0.0,
             "markers": "TIME, FSC-A, FSC-W, SSC-A, CD20, CD10, CD45, CD34, CD19, CD38, SY41",
             "sequence_length": false,
             "batch_size": 1,
-            "shuffle": true,
-            "sort": false,
             "num_workers": 2
         }
     },
@@ -48,21 +48,23 @@
     "lr_scheduler": {
         "type": "CosineAnnealingLR",
         "args": {
-            "T_max": 10,
-            "eta_min": 0.0002
+            "T_max": 30,
+            "eta_min": 0.00002
         }
     },
     "trainer": {
-        "epochs": 100,
+        "epochs": 200,
         "save_dir": "saved/",
         "save_period": 1,
         "verbosity": 1,
         "monitor": "max val_f1_score",
         "visualize": [
-            "CD10",
-            "CD45"
+            ["FSC-A", "SSC-A"], 
+            ["CD45", "SSC-A"], 
+            ["CD19", "SSC-A"], 
+            ["CD45", "CD10"]
         ],
         "early_stop": 50,
-        "tensorboard": true
+        "logger": "wandb"
     }
 }

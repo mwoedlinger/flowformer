@@ -1,5 +1,5 @@
 {
-    "name": "vie_ind_points",
+    "name": "bue_bln",
     "n_gpu": 1,
     "arch": {
         "type": "SetTransformer",
@@ -16,10 +16,8 @@
     "data_loader": {
         "type": "FlowDataLoader",
         "args": {
-            "train": "data/vie/train.txt",
-            "eval": "data/vie/eval.txt",
-            "test": "data/vie/test.txt",
-            "fast_preload_dir": "/data/mwoedlinger/data/tmp/vie",
+            "data_dir": "data/bue_bln",
+            "fast_preload_dir": "/data/mwoedlinger/data/tmp/bue_bln",
             "fast_preload": true,
             "markers": "TIME, FSC-A, FSC-W, SSC-A, CD20, CD10, CD45, CD34, CD19, CD38, SY41",
             "sequence_length": false,
@@ -45,12 +43,12 @@
     "lr_scheduler": {
         "type": "CosineAnnealingLR",
         "args": {
-            "T_max": 30,
-            "eta_min": 0.00002
+            "T_max": 10,
+            "eta_min": 0.0002
         }
     },
     "trainer": {
-        "epochs": 200,
+        "epochs": 100,
         "save_dir": "saved/",
         "save_period": 1,
         "verbosity": 1,

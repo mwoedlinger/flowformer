@@ -1,5 +1,5 @@
 {
-    "name": "vie_ind_points",
+    "name": "vie",
     "n_gpu": 1,
     "arch": {
         "type": "SetTransformer",
@@ -16,14 +16,17 @@
     "data_loader": {
         "type": "FlowDataLoader",
         "args": {
-            "train": "data/vie/train.txt",
-            "eval": "data/vie/eval.txt",
-            "test": "data/vie/test.txt",
+            "data_dir": "data/vie",
             "fast_preload_dir": "/data/mwoedlinger/data/tmp/vie",
+            "spillover_augmentation": false,
+            "center": false,
             "fast_preload": true,
+            "spillover_augmentation_intensity": 0.0,
             "markers": "TIME, FSC-A, FSC-W, SSC-A, CD20, CD10, CD45, CD34, CD19, CD38, SY41",
             "sequence_length": false,
             "batch_size": 1,
+            "shuffle": true,
+            "sort": false,
             "num_workers": 2
         }
     },
@@ -45,23 +48,21 @@
     "lr_scheduler": {
         "type": "CosineAnnealingLR",
         "args": {
-            "T_max": 30,
-            "eta_min": 0.00002
+            "T_max": 10,
+            "eta_min": 0.0002
         }
     },
     "trainer": {
-        "epochs": 200,
+        "epochs": 100,
         "save_dir": "saved/",
         "save_period": 1,
         "verbosity": 1,
         "monitor": "max val_f1_score",
         "visualize": [
-            ["FSC-A", "SSC-A"], 
-            ["CD45", "SSC-A"], 
-            ["CD19", "SSC-A"], 
-            ["CD45", "CD10"]
+            "CD10",
+            "CD45"
         ],
         "early_stop": 50,
-        "logger": "wandb"
+        "tensorboard": true
     }
 }
