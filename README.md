@@ -20,6 +20,8 @@ pip install flowmepy
 
 (If you run into issues with newer versions of dependencies check the `requirements.txt` file. It contains the environment package dependencies at the time of testing)
 
+IMPORTANT: As of now the flowmepy package is only supported on windows. If you are running a unix based system and want to try out our method you will need to preload the data (for example to a pandas dataframe) on a windows machine and then adapt the lines in the code where the flowme python package is called. Simply load your preloaded event matrices (dataframes or csv) instead of the `events = sample.events()` lines and load your gate label matrices (dataframes or csv) instead of the lines where `labels = sample.gate_labels()`. Sorry for the inconvenience, we are working on a solution.
+
 ## Usage
 
 The training configurations is defined in a config json file (check out the config folder for some the configs used for the experiments in our paper).
