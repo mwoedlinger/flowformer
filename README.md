@@ -39,7 +39,25 @@ python test.py -c saved/models/vie/TIMESTAMPT/config.json -r saved/models/vie/TI
 ```
 The test output is printed to the console and additional information is saved under `saved/models/vie/TIMESTAMPT/model_best.pth`.
 
-If selected, the fcs data is preloaded in the tmp folder as torch tensors. This speeds up the loading process
+If selected, the fcs data is preloaded in the tmp folder as torch tensors. This speeds up the loading process.
+
+For example, to test the pretrained model in `saved/models/vie14_bue/0720_153309` the command is 
+```
+python test.py -c saved/models/vie14_bue/0720_153309/config.json -r saved/models/vie14_bue/0720_153309/model_best.pth -d GPU_IDX
+```
+
+### Predict
+To apply a trained model to a single sample use the `predict.py` script:
+```
+python predict -c saved/models/EXP_NAME/TIMESTAMP/config.json -r saved/models/EXP_NAME/TIMESTAMP/model_best.pth -d GPU_IDX -f PATH/TO/XML/OR/ANALYSIS/FILE
+```
+
+The script computes the metric scores for the given file and plots a standard panel of marker combinations. The panel shows blasts in red an other cells in blue. The top row shows the ground truth information and the bottom row the predicted information. If the script is run with the optional option `-p` every possible marker combination is plotted as well (this might take around 30s, depending on the number of markers in the config file).
+
+For example to predict the file `Bue072d15` from the bue dataset you need to run:
+```
+python predict.py --config config/vie14_bue.json --resume saved/models/vie14_bue/0720_153309/model_best.pth -d 3 --file /PATH/TO/Bue072d15.xml -p
+```
 
 ### Data
 the config file expects a `data_dir` in the dataloader args. The specified data_dir is supposed to contain three text files (train.txt and eval.txt are needed during training and test.txt is needed during testing), where every line contains the path to a fcm file (`.xml` or `.analysis`). The vie14, bln and bue data from our work can be downloaded from here: https://flowrepository.org/id/FR-FCM-ZYVT
