@@ -24,12 +24,9 @@ installer/FlowMe.x64*
 /.idea
 /.ipynb_checkpoints
 /demos/.ipynb_checkpoints
-/saved
 /demos
-*.png
 _old
-output
-saved
+/saved/log
 tmp
 
 optimusPrime.png
