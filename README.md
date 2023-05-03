@@ -3,7 +3,7 @@
 Automatic detection of blast cells in ALL data using transformers. 
 
 Official implementation of our work: *"Automated Identification of Cell Populations in Flow Cytometry Data with Transformers"*
-by Matthias Wödlinger, Michael Reiter, Lisa Weijler, Margarita Maurer-Granofszky, Angela Schumich, Michael Dworzak
+by Matthias Wödlinger, Michael Reiter, Lisa Weijler, Margarita Maurer-Granofszky, Angela Schumich, Elisa O Sajaroff, Stefanie Groeneveld-Krentz, Jorge G Rossi, Leonid Karawajew, Richard Ratei and Michael Dworzak
 
 ## Installation
 
@@ -82,8 +82,9 @@ If you use this project please consider citing our work
 ```
 @article{wodlinger2022automated,
   title={Automated identification of cell populations in flow cytometry data with transformers},
-  author={Wodlinger, Matthias and Reiter, Michael and Weijler, Lisa and Maurer-Granofszky, Margarita and Schumich, Angela and Dworzak, Michael N},
+  author={W{\"o}dlinger, Matthias and Reiter, Michael and Weijler, Lisa and Maurer-Granofszky, Margarita and Schumich, Angela and Sajaroff, Elisa O and Groeneveld-Krentz, Stefanie and Rossi, Jorge G and Karawajew, Leonid and Ratei, Richard and others},
   journal={Computers in Biology and Medicine},
+  volume={144},
   pages={105314},
   year={2022},
   publisher={Elsevier}
