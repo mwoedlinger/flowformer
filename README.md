@@ -75,6 +75,10 @@ Here is what needs to be done (I recommend starting with one of the existing con
 
 The project is based on [this](https://github.com/victoresque/pytorch-template) pytorch template.
 
+## Erratum
+
+The default config uses 3 hidden layers which results in 4 ISAB layers in total contrary to 3 as stated in the paper. 
+
 ## Citation
 
 If you use this project please consider citing our work
