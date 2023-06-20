@@ -77,7 +77,8 @@ The project is based on [this](https://github.com/victoresque/pytorch-template) 
 
 ## Erratum
 
-The default config uses 3 hidden layers which results in 4 ISAB layers in total contrary to 3 as stated in the paper. There is a typo in Table 2 of the paper: The median f1 score of our method when trained on vie20 and tested on vie14 is actually 0.95 (and the mean f1 score is 0.84), making our method better than the GMM based method [14] in every benchmark.
+- The default config uses 3 hidden layers which results in 4 ISAB layers in total contrary to 3 as stated in the paper.
+- There is a typo in Table 2 of the paper: The median f1 score of our method when trained on vie20 and tested on vie14 is actually 0.95 (and the mean f1 score is 0.84), making our method better than the GMM based method [14] in every benchmark.
 
 ## Citation
 
