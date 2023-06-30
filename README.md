@@ -5,6 +5,8 @@ Automatic detection of blast cells in ALL data using transformers.
 Official implementation of our work: *"Automated Identification of Cell Populations in Flow Cytometry Data with Transformers"*
 by Matthias Wödlinger, Michael Reiter, Lisa Weijler, Margarita Maurer-Granofszky, Angela Schumich, Elisa O Sajaroff, Stefanie Groeneveld-Krentz, Jorge G Rossi, Leonid Karawajew, Richard Ratei and Michael Dworzak
 
+**A pretrained model is now available via the huggingface library: https://huggingface.co/matth/flowformer**
+
 ## Installation
 
 Install the flowformer package and all required packages with the setup.py file:
